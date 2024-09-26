@@ -87,8 +87,11 @@ class AggregatedPCDataLoader(Dataset):
                 points_set = points_set[:, :3]   
             return points_set, labels.astype(np.int32)
         else:
-            points_set = self.read_ply_unlabel(self.points_datapath[index])
-            return points_set
+            points_set, labels, intensity = self.read_ply(self.points_datapath[index])            
+            points_set = np.c_[points_set,intensity]
+            if not self.intensity_channel:
+                points_set = points_set[:, :3]    
+            return points_set, labels.astype(np.int32),self.points_datapath[index]
 
     def __getitem__(self, index):
         return self._get_item(index)

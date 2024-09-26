@@ -7,7 +7,6 @@ from data_utils.ioueval import iouEval
 from data_utils.collations import *
 from numpy import inf, pi, cos, array, expand_dims
 from functools import partial
-from testing import inference
 import OSToolBox as ost
 
 
@@ -20,7 +19,7 @@ class AggregatedPCTrainer(pl.LightningModule):
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.params = params
-        self.iter_log = 100
+        self.iter_log = self.params.batch_size
         self.best_acc = -1.
         self.best_miou = -1.
         self.best_loss = inf
@@ -45,7 +44,6 @@ class AggregatedPCTrainer(pl.LightningModule):
     def forward(self, x):
         h = self.model(x)
         z = self.model_head(h)
-
         return z
 
     ############################################################################################################################################

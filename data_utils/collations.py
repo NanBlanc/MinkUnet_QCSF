@@ -84,22 +84,27 @@ class SparseCollation:
     
             return p_coord, p_feats, p_label
         
-        #si validation
+        #si test
         else:
-            points_set = list(zip(*list_data))
+            
+            points_set, labels, fname = list(zip(*list_data))
+    
             points_set = np.asarray(points_set)
+            labels = np.asarray(labels)
 
             p_feats = []
             p_coord = []
+            p_label = []
 
-            for points in points_set:
-                coord, feats = point_set_to_coord_feats_inv(points, None, self.resolution, self.num_points, True)
+            for points, label in zip(points_set, labels):
+                coord, feats, label_, = point_set_to_coord_feats(points, label, self.resolution, self.num_points, True)
                 p_feats.append(feats)
                 p_coord.append(coord)
-
+                p_label.append(label_)
     
             p_feats = np.asarray(p_feats)
             p_coord = np.asarray(p_coord)
+            p_label = np.asarray(p_label)
+
     
-    
-            return p_coord, p_feats
+            return p_coord, p_feats, p_label, fname

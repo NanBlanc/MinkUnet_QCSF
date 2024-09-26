@@ -18,7 +18,7 @@ if __name__ == "__main__":
     parser.add_argument('--epochs', type=int, default=20, metavar='N',                        help='number of training epochs (default: 15)')
     parser.add_argument('--lr', type=float, default=2.4e-1,                        help='learning rate (default: 2.4e-1')
     parser.add_argument("--decay-lr", default=1e-4, action="store", type=float,                        help='Learning rate decay (default: 1e-4')
-    parser.add_argument('--log-dir', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/run',  help='logging directory (default: checkpoint)')
+    parser.add_argument('--log-dir', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train',  help='logging directory (default: checkpoint)')
     parser.add_argument('--use-cuda', action='store_true', default=True,                        help='using cuda (default: True')
     parser.add_argument('--device-id', type=int, default=0,                        help='GPU device id (default: 0')
     parser.add_argument('--feature-size', type=int, default=128,                        help='Feature output size (default: 128')
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     
     model_agg_pc = AggregatedPCTrainer(model, model_head, criterion, train_loader, test_loader, args)
     trainer = Trainer(gpus=[0], max_epochs=args.epochs, accumulate_grad_batches=args.accum_steps,num_sanity_val_steps=0,limit_val_batches=args.nb_val_batches,logger=False)
-    trainer.fit(model_agg_pc)
+    trainer.fit(model_agg_pc,ckpt_path=model_agg_pc.log_path)
 
     #INFERENCE
     #model_acc, model_miou, model_class_iou = inference(self.params.dataset_name, self.params.num_classes, self.model, self.model_head, self.val_loader)
