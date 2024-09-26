@@ -32,6 +32,7 @@ if __name__ == "__main__":
     parser.add_argument('--inference', action='store_true', default=False,                        help='visualize inference point cloud (default: False')
     parser.add_argument('--use-intensity', action='store_true', default=True,                    help='use points intensity')
     parser.add_argument('--ignore-labels', type=str, default="5",                    help='str of ignore labels sperated by commas ex : --ignore-labels="1,2,3"')
+    parser.add_argument('--nb-val-batches', type=int, default=50,                    help='int of maximum nb of batches to run for a val')
 
     args = parser.parse_args()
     args.ignore_labels = args.ignore_labels.split(',')
@@ -70,7 +71,7 @@ if __name__ == "__main__":
     # else:
     
     model_agg_pc = AggregatedPCTrainer(model, model_head, criterion, train_loader, test_loader, args)
-    trainer = Trainer(gpus=[0], max_epochs=args.epochs, accumulate_grad_batches=args.accum_steps,num_sanity_val_steps=0,limit_val_batches=2)
+    trainer = Trainer(gpus=[0], max_epochs=args.epochs, accumulate_grad_batches=args.accum_steps,num_sanity_val_steps=0,limit_val_batches=args.nb_val_batches,logger=False)
     trainer.fit(model_agg_pc)
 
     #INFERENCE
