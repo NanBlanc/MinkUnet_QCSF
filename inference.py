@@ -73,9 +73,10 @@ def test_pipeline(model, test_loader, args):
         
         del x,pred,h,z
     
-    miou, iou= [a.long().cpu().numpy() for a in evaluator.getIoU()]
-    acc=evaluator.getacc().long().cpu().numpy()
-    tp, fp, fn, conf = [a.long().cpu().numpy() for a in evaluator.getStats()]
+    miou, iou= [a.cpu().numpy() for a in evaluator.getIoU()]
+    acc=evaluator.getacc().cpu().numpy()
+    tp, fp, fn, conf = [a.cpu().numpy() for a in evaluator.getStats()]
+    print(miou, iou)
     with open(args.log_dir+"/metrics.txt","w") as f :
         f.write("OA "+ str(acc)+"\n")
         f.write("mIoU "+ str(miou)+"\n")
@@ -118,7 +119,7 @@ if __name__ == "__main__":
     parser.add_argument('--use-intensity', action='store_true', default=True,                                                       help='use points intensity')
     parser.add_argument('--ignore-labels', type=str, default="5",                                                                   help='str of ignore labels sperated by commas ex : --ignore-labels="1,2,3"')
     parser.add_argument('--log-dir', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/inference',                        help='logging directory (default: checkpoint)')
-    parser.add_argument('--checkpoint', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train/bestepoch2_model.pt',     help='path of checkpoint to use')
+    parser.add_argument('--checkpoint', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train_1/bestepoch4_model.pt',     help='path of checkpoint to use')
 
     
     args = parser.parse_args()
