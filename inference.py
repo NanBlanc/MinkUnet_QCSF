@@ -76,7 +76,6 @@ def test_pipeline(model, test_loader, args):
     miou, iou= [a.cpu().numpy() for a in evaluator.getIoU()]
     acc=evaluator.getacc().cpu().numpy()
     tp, fp, fn, conf = [a.cpu().numpy() for a in evaluator.getStats()]
-    print(miou, iou)
     with open(args.log_dir+"/metrics.txt","w") as f :
         f.write("OA "+ str(acc)+"\n")
         f.write("mIoU "+ str(miou)+"\n")
