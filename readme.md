@@ -1,8 +1,6 @@
 # System tested : 
 Ubuntu 18.04
 
-NVIDIA-SMI 470.182.03
-
 Driver Version: 470.182.03
 
 CUDA Version: 11.4
