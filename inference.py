@@ -19,46 +19,15 @@ import OSToolBox as ost
 import time
 
 
-
-def model_pipeline_validation(model, data, args):
-    eval = iouEval(n_classes=args.num_classes, ignore=0)
-    for iter_n, (x_coord, x_feats, x_label, _, _) in enumerate(tqdm(data)):
-        x, y = numpy_to_sparse_tensor(x_coord, x_feats, x_label)
-
-        if 'UNet' in args.sparse_model:
-            y = y[:, 0]
-        else:
-            y = torch.from_numpy(np.asarray(y))
-            y = y[:, 0]
-
-        h = model['model'](x)
-        z = model['classifier'](h)
-
-        y = y.cuda() if args.use_cuda else y
-
-        # accumulate accuracy
-        pred = z.max(dim=1)[1]
-        eval.addBatch(pred.long().cpu().numpy(), y.long().cpu().numpy())
-        
-        del x,y,pred,h,z
-        torch.cuda.empty_cache()
-        
-        
-    acc = eval.getacc()
-    mean_iou, class_iou = eval.getIoU()
-    # return the epoch mean loss
-    return acc, mean_iou, class_iou
-
-
 def test_pipeline(model, test_loader, args):
-    evaluator = iouEval(n_classes=args.num_classes)
-
+    evaluator = iouEval(n_classes=args.num_classes,ignore=args.ignore_labels)
+    
     for iter_n, batch in enumerate(tqdm(test_loader)):
         
-        p_coord, p_feats, p_label, fname = batch
+        x_coord, x_feats, x_label, inv_inds, real_pc, real_la, fname = batch
         
-        x,y = numpy_to_sparse_tensor(p_coord, p_feats , p_label)
-     
+        x,y = numpy_to_sparse_tensor(x_coord, x_feats , x_label)
+        
         y = y[:,0]
 
         h = model['model'](x)
@@ -67,9 +36,13 @@ def test_pipeline(model, test_loader, args):
         
         pred_np=pred.long().cpu().numpy()
         evaluator.addBatch(pred_np, y.long().cpu().numpy())
+        pred_remapped=pred_np[inv_inds[0]]
         
         if args.save_inference:
-            pred_np.tofile(args.log_dir+"/"+ost.pathLeaf(fname[0])+".bin")
+            real_pc=np.squeeze(real_pc,0)
+            real_la=np.squeeze(real_la,0)
+            file=args.log_dir+"/"+ost.pathLeaf(fname[0])
+            ost.write_ply(file,[real_pc,real_la.astype(np.uint16),pred_remapped.astype(np.uint16)],["x","y","z","intensity","class","pred"])
         
         del x,pred,h,z
     
@@ -84,13 +57,10 @@ def test_pipeline(model, test_loader, args):
                 f.write(name+"_"+data_map_SimQC.labels[i]+" "+str(val)+"\n")
     
     np.savetxt(args.log_dir+"/confusion_matrix.txt",conf,fmt="%d")
-        
-
-
 
 
 def run_inference(model, args):
-    dataset=data_loader(root=args.data_dir,  split=args.split, dataset_name=args.dataset_name, resolution=args.sparse_resolution, intensity_channel=args.use_intensity)
+    dataset=data_loader(root=args.data_dir,  split=args.split, dataset_name=args.dataset_name, resolution=args.sparse_resolution, use_intensity=args.use_intensity, max_intensity=args.max_intensity)
 
     # create the data loader for train and validation data
     collate_function = SparseCollation(args.sparse_resolution, args.split, args.num_points)
@@ -102,27 +72,38 @@ def run_inference(model, args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='SparseSimCLR')
-
-    parser.add_argument('--dataset-name', type=str, default='SimQC',                                                                help='Name of dataset (default: ParisLille3D')
+    
+    #real DATA
+    # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/ALSlike_xyzic',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
+    # parser.add_argument('--max-intensity', type=float, default=1024.1268310546875,                                                    help='max valued of intensity used to normalize')
+    #test QCSF DATA
+    # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC_sample',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
     parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
+    parser.add_argument('--max-intensity', type=float, default=1024.1268310546875,                                                    help='max valued of intensity used to normalize')
+
+    
+    #CHOOSE MODEL
+    parser.add_argument('--checkpoint', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train_6/bestepoch0_model.pt',     help='path of checkpoint to use')
+
+    #OUTPUT
+    parser.add_argument('--log-dir', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/inference',                           help='logging directory (default: checkpoint)')
+
+    #SHOULD STAY LIKE THAT
+    parser.add_argument('--dataset-name', type=str, default='SimQC',                                                                help='Name of dataset (default: ParisLille3D')
     parser.add_argument('--use-cuda', action='store_true', default=True,                                                            help='using cuda (default: True')
     parser.add_argument('--split', type=str, default='test',                                                                        help='dataset split (default: test)')
-    parser.add_argument('--num-classes', type=int, default=4,                                                                       help='Number of classes in the dataset')
+    parser.add_argument('--num-classes', type=int, default=5,                                                                       help='Number of classes in the dataset')
     parser.add_argument('--device-id', type=int, default=0,                                                                         help='GPU device id (default: 0')
     parser.add_argument('--feature-size', type=int, default=128,                                                                    help='Feature output size (default: 128')
     parser.add_argument('--num-points', type=int, default=80000,                                                                    help='Number of points sampled from point clouds (default: 80000')
     parser.add_argument('--sparse-resolution', type=float, default=0.05,                                                            help='Sparse tensor resolution (default: 0.01')
     parser.add_argument('--sparse-model', type=str, default='MinkUNet',                                                             help='Sparse model to be used (default: MinkUNet')
     parser.add_argument('--batch-size', type=int, default=1, metavar='N',                                                           help='input inference batch-size')
-    parser.add_argument('--save-inference', action='store_true', default=True,                                               help='save the inference as point clouds (default: False')
-    parser.add_argument('--use-intensity', action='store_true', default=True,                                                       help='use points intensity')
-    parser.add_argument('--ignore-labels', type=str, default="5",                                                                   help='str of ignore labels sperated by commas ex : --ignore-labels="1,2,3"')
-    parser.add_argument('--log-dir', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/inference',                        help='logging directory (default: checkpoint)')
-    parser.add_argument('--checkpoint', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train_1/bestepoch4_model.pt',     help='path of checkpoint to use')
+    parser.add_argument('--save-inference', action='store_true', default=True,                                                        help='save the inference as point clouds (default: False')
+    parser.add_argument('--use-intensity', action='store_true', default=True,                                                        help='use points intensity')
+    parser.add_argument('--ignore-labels', type=int, default=4,                                                                       help='str of ignore labels sperated by commas ex : --ignore-labels="1,2,3"')
 
-    
     args = parser.parse_args()
-    args.ignore_labels = args.ignore_labels.split(',')
     print("IGNORE LABELS NOT WELL CODED" )
     
     if args.save_inference:

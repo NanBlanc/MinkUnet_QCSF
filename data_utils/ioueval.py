@@ -7,7 +7,7 @@ class iouEval:
     # classes
     self.n_classes = n_classes
     self.accum_loss = []
-
+    
     # What to include and ignore from the means
     if ignore != None:
         self.ignore = torch.tensor(ignore).long()
@@ -27,10 +27,15 @@ class iouEval:
 
     # reset the class counters
     self.reset()
-
+    
   def num_classes(self):
     return self.n_classes
 
+  def delete(arr: torch.Tensor, ind: int, dim: int) -> torch.Tensor:
+    skip = [i for i in range(arr.size(dim)) if i != ind]
+    indices = [slice(None) if i != dim else skip for i in range(arr.ndim)]
+    return arr.__getitem__(indices)
+  
   def reset(self):
     self.accum_loss = []
     self.conf_matrix = torch.zeros(
@@ -66,7 +71,11 @@ class iouEval:
     conf = self.conf_matrix.clone().double()
 
     if self.ignore != None:
-        conf[:, self.ignore] = 0
+        row_exclude=self.ignore
+        conf = torch.cat((conf[:row_exclude],conf[row_exclude+1:]))
+        column_exclude=self.ignore
+        conf = torch.cat((conf[:,:column_exclude],conf[:,column_exclude+1:]),dim=1)
+
     
     # get the clean stats
     tp = conf.diag()

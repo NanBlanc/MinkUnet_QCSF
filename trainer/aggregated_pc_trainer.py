@@ -23,7 +23,7 @@ class AggregatedPCTrainer(pl.LightningModule):
         self.best_acc = -1.
         self.best_miou = -1.
         self.best_loss = inf
-        self.evaluator = iouEval(n_classes=self.params.num_classes)
+        self.evaluator = iouEval(n_classes=self.params.num_classes,ignore=self.params.ignore_labels)
         self.val_step = 0
         self.train_step = 0
         

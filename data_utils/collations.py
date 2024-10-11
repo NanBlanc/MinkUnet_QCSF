@@ -42,6 +42,22 @@ def point_set_to_coord_feats(point_set, labels, resolution, num_points, determin
 
     return p_coord[mapping], p_feats[mapping], labels[mapping]
 
+def point_set_to_coord_feats_inv(point_set, labels=None, resolution=None, num_points=None, deterministic=False):
+    p_feats = point_set.copy()
+    p_coord = np.round(point_set[:, :3] / resolution)
+    p_coord -= p_coord.min(0, keepdims=1)
+
+    _, mapping, inverse = ME.utils.sparse_quantize(coordinates=p_coord, return_index=True, return_inverse=True)
+    if len(mapping) > num_points:
+        if deterministic:
+            # for reproducibility we set the seed
+            np.random.seed(42)
+        mapping = np.random.choice(mapping, num_points, replace=False)
+    if labels is None:
+        return p_coord[mapping], p_feats[mapping], inverse.numpy()
+    else:
+        return p_coord[mapping], p_feats[mapping], labels[mapping], inverse.numpy()
+
 
 def collate_points_to_sparse_tensor(pi_coord, pi_feats, pj_coord, pj_feats):
     # voxelize on a sparse tensor
@@ -86,25 +102,29 @@ class SparseCollation:
         
         #si test
         else:
-            
             points_set, labels, fname = list(zip(*list_data))
-    
-            points_set = np.asarray(points_set)
-            labels = np.asarray(labels)
 
             p_feats = []
             p_coord = []
             p_label = []
-
+            p_inv = []
+            real_pc = []
+            real_la = []
+            
             for points, label in zip(points_set, labels):
-                coord, feats, label_, = point_set_to_coord_feats(points, label, self.resolution, self.num_points, True)
+                coord, feats, lab, inv_inds = point_set_to_coord_feats_inv(points, label, self.resolution, self.num_points, True)
                 p_feats.append(feats)
                 p_coord.append(coord)
-                p_label.append(label_)
-    
+                p_label.append(lab)
+                p_inv.append(inv_inds)
+                real_pc.append(points)
+                real_la.append(label)
+            
             p_feats = np.asarray(p_feats)
             p_coord = np.asarray(p_coord)
             p_label = np.asarray(p_label)
-
+            p_inv = np.asarray(p_inv)
+            real_pc = np.asarray(real_pc)
+            real_la = np.asarray(real_la)
     
-            return p_coord, p_feats, p_label, fname
+            return p_coord, p_feats, p_label, p_inv, real_pc, real_la, fname
