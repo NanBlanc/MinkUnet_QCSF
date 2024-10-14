@@ -75,11 +75,11 @@ if __name__ == "__main__":
     
     #real DATA
     # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/ALSlike_xyzic',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
-    # parser.add_argument('--max-intensity', type=float, default=1024.1268310546875,                                                    help='max valued of intensity used to normalize')
+    # parser.add_argument('--max-intensity', type=float, default=AAAAAAAAAAAAAA,                                                    help='max valued of intensity used to normalize')
     #test QCSF DATA
     # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC_sample',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
     parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
-    parser.add_argument('--max-intensity', type=float, default=1024.1268310546875,                                                    help='max valued of intensity used to normalize')
+    parser.add_argument('--max-intensity', type=float, default=1025,                                                    help='max valued of intensity used to normalize')
 
     
     #CHOOSE MODEL

@@ -37,63 +37,54 @@ class AggregatedPCDataLoader(Dataset):
     def datapath_list(self,split_path):
         self.points_datapath = ost.getFileBySubstr(split_path,'.ply')
 
-    def qcsf_transforms(self, points):
+
+    def transform(self, points):
+        ##point drop
+        #random point drop
+        points=ost.randomDrop(points,0.1)
+        #cuboid drop
+        points=ost.randomCuboidDrop(points,2,6,4,1)
+        
+        ##position
         # translation :
         translation_xy=np.random.uniform(-20,0,2)
         translation_xyz=np.append(translation_xy,np.random.uniform(-10,10))
-        points+=translation_xyz
-        
+        points[:,:3]+=translation_xyz
+        #scene flip
+        points=ost.randomFlip(points)
         # rotation :
         theta = np.random.uniform(0, 2*np.pi)
-        rot_mat = np.array([[np.cos(theta),-np.sin(theta), 0],
-                            [np.sin(theta), np.cos(theta), 0], 
-                            [0, 0, 1]])
-        points[:, :3] = np.dot(points[:, :3], rot_mat)
-        
+        points=ost.rotationZ(points, theta)
         # jittering : 
-        sigma=0.05
-        clip=0.2
-        points += np.clip(sigma * np.random.randn(points.shape[0],points.shape[1]), -1*clip, clip)    
+        points=ost.jittering(points,0.05)
+        
+        ##features
+        #intensity augment
+        if self.use_intensity:
+            points=ost.featureAugmentation(points,3,self.max_intensity)
         return points
-    
-    def qcsf_intensity_transform(self, intensity_values, maximum):
-        sigma=maximum/100
-        clip=sigma*4
-        intensity_values += np.clip(sigma * np.random.randn(intensity_values.shape[0],intensity_values.shape[1]), -1*clip, clip)
-        normalized=intensity_values/maximum
-        return normalized
 
     def __len__(self):
         return len(self.points_datapath)
     
-    def read_ply(self, file_name):
-        data = ost.read_ply(file_name)
-        cloud_x = data['x']
-        cloud_y = data['y']
-        cloud_z = data['z']
-        labels = (data['class']).astype(np.int32)
-        intensity=[]
-        if self.use_intensity :
-            intensity = data['intensity']
-            intensity = intensity.reshape(len(intensity), 1)
-        labels = labels.reshape(len(labels), 1)
-        return(np.c_[cloud_x, cloud_y, cloud_z], labels, intensity)
-    
     def _get_item(self, index):
         if self.split != 'test':
             # print(self.points_datapath[index])
-            points, labels, intensity = self.read_ply(self.points_datapath[index])            
+            cloud = ost.readPly(self.points_datapath[index])            
             
             #transforms
-            points = self.qcsf_transforms(points)
+            cloud = self.transform(cloud)
             
+            #reshape labels as (nb_po,1)
+            labels=cloud[:,4].astype(np.int32) if self.use_intensity else cloud[:,4].astype(np.int32)
+            labels=cloud[:,4].astype(np.int32).reshape(cloud.shape[0],1)
+                           
             if not self.use_intensity :
-                return points, labels.astype(np.int32)
-            
-            #transform int
-            intensity=self.qcsf_intensity_transform(intensity,self.max_intensity)
-            points_set = np.c_[points,intensity]
-            return points_set, labels.astype(np.int32)
+                labels=cloud[:,3].astype(np.int32).reshape(cloud.shape[0],1)
+                return cloud[:,:3], labels
+            else :
+                labels=cloud[:,4].astype(np.int32).reshape(cloud.shape[0],1)
+                return cloud[:,:4], labels
             
             # remove unlabeled points
             #REMOVING IGNORE LABELS IS NOT A GOOD IDEA
@@ -107,14 +98,15 @@ class AggregatedPCDataLoader(Dataset):
                     
         else:
             # print(self.points_datapath[index])
-            points, labels, intensity = self.read_ply(self.points_datapath[index])            
+            cloud = ost.readPly(self.points_datapath[index])            
             if not self.use_intensity :
-                return points, labels.astype(np.int32)
-            
-            #normalisation intensity
-            intensity/=self.max_intensity
-            points_set = np.c_[points,intensity]
-            return points_set, labels.astype(np.int32),self.points_datapath[index]
+                labels=cloud[:,3].astype(np.int32).reshape(cloud.shape[0],1)
+                return cloud[:,:3], labels, self.points_datapath[index]
+            else :
+                #normalisation intensity
+                cloud[:,3]/=self.max_intensity
+                labels=cloud[:,4].astype(np.int32).reshape(cloud.shape[0],1)
+                return cloud[:,:4], labels, self.points_datapath[index]
         
 
     def __getitem__(self, index):

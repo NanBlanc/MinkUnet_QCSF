@@ -12,8 +12,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='SparseSimCLR')
     
     #INPUT
-    # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC_sample',                        help='Path to dataset (default: ./Datasets/SimQC')
-    parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                        help='Path to dataset (default: ./Datasets/SimQC')
+    parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC_sample',                        help='Path to dataset (default: ./Datasets/SimQC')
+    # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                        help='Path to dataset (default: ./Datasets/SimQC')
     
     #OUTPUT
     parser.add_argument('--log-dir', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train',  help='logging directory (default: checkpoint)')
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     parser.add_argument('--accum-steps', type=int, default=1,                                            help='Number steps to accumulate gradient')
     parser.add_argument('--inference', action='store_true', default=False,                               help='visualize inference point cloud (default: False')
     parser.add_argument('--use-intensity', action='store_true', default=True,                             help='use points intensity')
-    parser.add_argument('--max-intensity', type=float, default=1024.1268310546875,                         help='max valued of intensity used to normalize')
+    parser.add_argument('--max-intensity', type=float, default=1025,                                    help='max valued of intensity used to normalize')
     parser.add_argument('--ignore-labels', type=str, default=4,                                        help='str of ignore labels sperated by commas ex : --ignore-labels="1,2,3"')
     parser.add_argument('--nb-val-batches', type=int, default=20,                                        help='int of maximum nb of batches to run for a val')
     args = parser.parse_args()
