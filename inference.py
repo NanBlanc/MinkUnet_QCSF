@@ -29,7 +29,7 @@ def test_pipeline(model, test_loader, args):
         x,y = numpy_to_sparse_tensor(x_coord, x_feats , x_label)
         
         y = y[:,0]
-
+        
         h = model['model'](x)
         z = model['classifier'](h)
         pred = z.max(dim=1)[1]
@@ -42,8 +42,10 @@ def test_pipeline(model, test_loader, args):
             real_pc=np.squeeze(real_pc,0)
             real_la=np.squeeze(real_la,0)
             file=args.log_dir+"/"+ost.pathLeaf(fname[0])
-            ost.write_ply(file,[real_pc,real_la.astype(np.uint16),pred_remapped.astype(np.uint16)],["x","y","z","intensity","class","pred"])
-        
+            if args.use_intensity:
+                ost.write_ply(file,[real_pc,real_la.astype(np.uint16),pred_remapped.astype(np.uint16)],["x","y","z","intensity","class","pred"])
+            else :
+                ost.write_ply(file,[real_pc,real_la.astype(np.uint16),pred_remapped.astype(np.uint16)],["x","y","z","class","pred"])
         del x,pred,h,z
     
     miou, iou= [a.cpu().numpy() for a in evaluator.getIoU()]
@@ -75,15 +77,19 @@ if __name__ == "__main__":
     
     #real DATA
     # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/ALSlike_xyzic',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
-    # parser.add_argument('--max-intensity', type=float, default=AAAAAAAAAAAAAA,                                                    help='max valued of intensity used to normalize')
-    #test QCSF DATA
-    # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC_sample',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
-    parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
-    parser.add_argument('--max-intensity', type=float, default=1025,                                                    help='max valued of intensity used to normalize')
+    # parser.add_argument('--use-intensity', action='store_true', default=True,                                                        help='use points intensity')
+    # parser.add_argument('--max-intensity', type=float, default=125,                                                    help='max valued of intensity used to normalize')
+    # parser.add_argument('--num-classes', type=int, default=5,                                                                       help='Number of classes in the dataset')
 
-    
+    #test QCSF DATA
+    parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC_sample',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
+    # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
+    parser.add_argument('--use-intensity', action='store_true', default=False,                                                        help='use points intensity')
+    parser.add_argument('--max-intensity', type=float, default=1025,                                                    help='max valued of intensity used to normalize')
+    parser.add_argument('--num-classes', type=int, default=4,                                                                       help='Number of classes in the dataset')
+
     #CHOOSE MODEL
-    parser.add_argument('--checkpoint', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train_6/bestepoch0_model.pt',     help='path of checkpoint to use')
+    parser.add_argument('--checkpoint', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train_5/bestepoch0_model.pt',     help='path of checkpoint to use')
 
     #OUTPUT
     parser.add_argument('--log-dir', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/inference',                           help='logging directory (default: checkpoint)')
@@ -92,7 +98,6 @@ if __name__ == "__main__":
     parser.add_argument('--dataset-name', type=str, default='SimQC',                                                                help='Name of dataset (default: ParisLille3D')
     parser.add_argument('--use-cuda', action='store_true', default=True,                                                            help='using cuda (default: True')
     parser.add_argument('--split', type=str, default='test',                                                                        help='dataset split (default: test)')
-    parser.add_argument('--num-classes', type=int, default=5,                                                                       help='Number of classes in the dataset')
     parser.add_argument('--device-id', type=int, default=0,                                                                         help='GPU device id (default: 0')
     parser.add_argument('--feature-size', type=int, default=128,                                                                    help='Feature output size (default: 128')
     parser.add_argument('--num-points', type=int, default=80000,                                                                    help='Number of points sampled from point clouds (default: 80000')
@@ -100,11 +105,10 @@ if __name__ == "__main__":
     parser.add_argument('--sparse-model', type=str, default='MinkUNet',                                                             help='Sparse model to be used (default: MinkUNet')
     parser.add_argument('--batch-size', type=int, default=1, metavar='N',                                                           help='input inference batch-size')
     parser.add_argument('--save-inference', action='store_true', default=True,                                                        help='save the inference as point clouds (default: False')
-    parser.add_argument('--use-intensity', action='store_true', default=True,                                                        help='use points intensity')
     parser.add_argument('--ignore-labels', type=int, default=4,                                                                       help='str of ignore labels sperated by commas ex : --ignore-labels="1,2,3"')
 
     args = parser.parse_args()
-    print("IGNORE LABELS NOT WELL CODED" )
+    print("IGNORE LABELS NOT WELL IMPLEMENTED : BE CAREFUL" )
     
     if args.save_inference:
         args.log_dir=ost.createDirIncremental(args.log_dir)

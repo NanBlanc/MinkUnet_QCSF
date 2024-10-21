@@ -80,7 +80,7 @@ class AggregatedPCDataLoader(Dataset):
             labels=cloud[:,4].astype(np.int32).reshape(cloud.shape[0],1)
                            
             if not self.use_intensity :
-                labels=cloud[:,3].astype(np.int32).reshape(cloud.shape[0],1)
+                labels=cloud[:,4].astype(np.int32).reshape(cloud.shape[0],1)
                 return cloud[:,:3], labels
             else :
                 labels=cloud[:,4].astype(np.int32).reshape(cloud.shape[0],1)
@@ -100,7 +100,7 @@ class AggregatedPCDataLoader(Dataset):
             # print(self.points_datapath[index])
             cloud = ost.readPly(self.points_datapath[index])            
             if not self.use_intensity :
-                labels=cloud[:,3].astype(np.int32).reshape(cloud.shape[0],1)
+                labels=cloud[:,4].astype(np.int32).reshape(cloud.shape[0],1)
                 return cloud[:,:3], labels, self.points_datapath[index]
             else :
                 #normalisation intensity

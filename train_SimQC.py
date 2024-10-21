@@ -12,8 +12,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='SparseSimCLR')
     
     #INPUT
-    parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC_sample',                        help='Path to dataset (default: ./Datasets/SimQC')
-    # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                        help='Path to dataset (default: ./Datasets/SimQC')
+    # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC_sample',                        help='Path to dataset (default: ./Datasets/SimQC')
+    parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                        help='Path to dataset (default: ./Datasets/SimQC')
+    parser.add_argument('--use-intensity', action='store_true', default=False,                             help='use points intensity')
+    parser.add_argument('--max-intensity', type=float, default=1025,                                    help='max valued of intensity used to normalize')
+
     
     #OUTPUT
     parser.add_argument('--log-dir', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train',  help='logging directory (default: checkpoint)')
@@ -21,7 +24,7 @@ if __name__ == "__main__":
     #SHOULD STAY LIKE THAT
     parser.add_argument('--dataset-name', type=str, default='SimQC',                                    help='Name of dataset (default: SimQC')
     parser.add_argument('--num_classes', type=int, default=4,                                            help='Number of classes in the dataset')
-    parser.add_argument('--batch-size', type=int, default=24, metavar='N',                               help='input training batch-size')
+    parser.add_argument('--batch-size', type=int, default=20, metavar='N',                               help='input training batch-size')
     parser.add_argument('--epochs', type=int, default=20, metavar='N',                                    help='number of training epochs (default: 15)')
     parser.add_argument('--lr', type=float, default=2.4e-1,                                               help='learning rate (default: 2.4e-1')
     parser.add_argument("--decay-lr", default=1e-4, action="store", type=float,                           help='Learning rate decay (default: 1e-4')
@@ -36,8 +39,6 @@ if __name__ == "__main__":
     parser.add_argument('--load-epoch', type=str, default='lastepoch199',                                 help='model checkpoint (default: classifier_checkpoint)')
     parser.add_argument('--accum-steps', type=int, default=1,                                            help='Number steps to accumulate gradient')
     parser.add_argument('--inference', action='store_true', default=False,                               help='visualize inference point cloud (default: False')
-    parser.add_argument('--use-intensity', action='store_true', default=True,                             help='use points intensity')
-    parser.add_argument('--max-intensity', type=float, default=1025,                                    help='max valued of intensity used to normalize')
     parser.add_argument('--ignore-labels', type=str, default=4,                                        help='str of ignore labels sperated by commas ex : --ignore-labels="1,2,3"')
     parser.add_argument('--nb-val-batches', type=int, default=20,                                        help='int of maximum nb of batches to run for a val')
     args = parser.parse_args()
