@@ -56,7 +56,7 @@ def test_pipeline(model, test_loader, args):
         f.write("mIoU "+ str(miou)+"\n")
         for metric,name in zip([iou,tp,fp,fn],["IoU","TP","FP","FN"]) :
             for i,val in enumerate(metric) :
-                f.write(name+"_"+data_map_SimQC.labels[i]+" "+str(val)+"\n")
+                f.write(name+"_"+data_map_SimQC.labels[i].replace(" ","_")+" "+str(val)+"\n")
     
     np.savetxt(args.log_dir+"/confusion_matrix.txt",conf,fmt="%d")
 
@@ -76,8 +76,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='SparseSimCLR')
     
     #real DATA
-    parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/ALSlike_xyzic',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
-    parser.add_argument('--use-intensity', action='store_true', default=False,                                                        help='use points intensity')
+    # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/ALSlike_xyzic',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
+    parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/ALSlike_p3train',                                                help='Path to dataset (default: /home/reza/PHD/Data/Parislille3D/fps_knn')
+    parser.add_argument('--use-intensity', action='store_true', default=True,                                                        help='use points intensity')
     parser.add_argument('--max-intensity', type=float, default=125,                                                    help='max valued of intensity used to normalize')
     parser.add_argument('--num-classes', type=int, default=5,                                                                       help='Number of classes in the dataset')
 
@@ -89,7 +90,7 @@ if __name__ == "__main__":
     # parser.add_argument('--num-classes', type=int, default=4,                                                                       help='Number of classes in the dataset')
 
     #CHOOSE MODEL
-    parser.add_argument('--checkpoint', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train/lastepoch19_model.pt',     help='path of checkpoint to use')
+    parser.add_argument('--checkpoint', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train/bestepoch0_model.pt',     help='path of checkpoint to use')
 
     #OUTPUT
     parser.add_argument('--log-dir', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/inference',                           help='logging directory (default: checkpoint)')

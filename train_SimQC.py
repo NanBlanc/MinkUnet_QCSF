@@ -13,14 +13,17 @@ if __name__ == "__main__":
     
     #INPUT
     # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC_sample',                        help='Path to dataset (default: ./Datasets/SimQC')
-    parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                        help='Path to dataset (default: ./Datasets/SimQC')
-    parser.add_argument('--use-intensity', action='store_true', default=True,                             help='use points intensity')
-    parser.add_argument('--max-intensity', type=float, default=1025,                                    help='max valued of intensity used to normalize')
+    # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                        help='Path to dataset (default: ./Datasets/SimQC')
+    # parser.add_argument('--use-intensity', action='store_true', default=True,                             help='use points intensity')
+    # parser.add_argument('--max-intensity', type=float, default=1025,                                    help='max valued of intensity used to normalize')
+    # parser.add_argument('--load-checkpoint', type=str, default="None",                          help='load checkpoint (default: True')
 
     #FINETUNING
-    parser.add_argument('--load-checkpoint', type=str, default="/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train_181024_int+tr/lastepoch19_model.pt",                          help='load checkpoint (default: True')
-    # parser.add_argument('--use-intensity', action='store_true', default=True,                             help='use points intensity')
-    # parser.add_argument('--max-intensity', type=float, default=125,                                    help='max valued of intensity used to normalize')
+    parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/ALSlike_p12train',                        help='Path to dataset (default: ./Datasets/SimQC')
+    parser.add_argument('--load-checkpoint', type=str, default=None,                          help='load checkpoint (default: True')
+    # parser.add_argument('--load-checkpoint', type=str, default="/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train_181024_int+tr/lastepoch19_model.pt",                          help='load checkpoint (default: True')
+    parser.add_argument('--use-intensity', action='store_true', default=True,                             help='use points intensity')
+    parser.add_argument('--max-intensity', type=float, default=125,                                    help='max valued of intensity used to normalize')
 
     
     #OUTPUT
@@ -30,7 +33,7 @@ if __name__ == "__main__":
     parser.add_argument('--dataset-name', type=str, default='SimQC',                                    help='Name of dataset (default: SimQC')
     parser.add_argument('--num_classes', type=int, default=4,                                            help='Number of classes in the dataset')
     parser.add_argument('--batch-size', type=int, default=20, metavar='N',                               help='input training batch-size')
-    parser.add_argument('--epochs', type=int, default=20, metavar='N',                                    help='number of training epochs (default: 15)')
+    parser.add_argument('--epochs', type=int, default=100, metavar='N',                                    help='number of training epochs (default: 15)')
     parser.add_argument('--lr', type=float, default=2.4e-1,                                               help='learning rate (default: 2.4e-1')
     parser.add_argument("--decay-lr", default=1e-4, action="store", type=float,                           help='Learning rate decay (default: 1e-4')
     parser.add_argument('--use-cuda', action='store_true', default=True,                                    help='using cuda (default: True')

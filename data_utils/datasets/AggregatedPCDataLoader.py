@@ -72,8 +72,8 @@ class AggregatedPCDataLoader(Dataset):
             # print(self.points_datapath[index])
             cloud = ost.readPly(self.points_datapath[index])            
             
-            #transforms
-            # cloud = self.transform(cloud)
+            transforms
+            cloud = self.transform(cloud)
             
             
             #reshape labels as (nb_po,1)
