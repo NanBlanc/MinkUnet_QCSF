@@ -72,7 +72,7 @@ class AggregatedPCDataLoader(Dataset):
             # print(self.points_datapath[index])
             cloud = ost.readPly(self.points_datapath[index])            
             
-            transforms
+            # transforms
             cloud = self.transform(cloud)
             
             
