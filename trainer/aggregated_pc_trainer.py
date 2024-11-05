@@ -8,6 +8,7 @@ from data_utils.collations import *
 from numpy import inf, pi, cos, array, expand_dims
 from functools import partial
 import OSToolBox as ost
+import os
 
 
 class AggregatedPCTrainer(pl.LightningModule):
@@ -31,7 +32,7 @@ class AggregatedPCTrainer(pl.LightningModule):
         self.writer = SummaryWriter(self.log_path)
 
                 
-        if self.params.load_checkpoint:
+        if self.params.load_checkpoint is not None:
             self.load_checkpoint()
         
         self.labels = data_map_SimQC.labels
@@ -223,28 +224,25 @@ class AggregatedPCTrainer(pl.LightningModule):
 
     def load_checkpoint(self):
         self.configure_optimizers()
-
-        if self.params.contrastive:
-            # load model, best loss and optimizer
-            file_name = f'{self.params.log_dir}/{self.params.load_epoch}_model.pt'
-            checkpoint = torch.load(file_name, map_location='cuda:0')
-            self.model.load_state_dict(checkpoint['model'])
-            print(f'Contrastive {file_name} loaded from epoch {checkpoint["epoch"]}')
+        
+        core_path=self.params.load_checkpoint
+        head_path=ost.pathBranch(self.params.load_checkpoint)+"/"+ost.pathLeaf(self.params.load_checkpoint)+"_head.pt"
+        if os.path.isfile(self.params.load_checkpoint) & os.path.isfile(head_path):
+            print("Found core:",core_path,"\nFound head :", head_path)
         else:
-            # load model, best loss and optimizer
-            file_name = f'{self.params.log_dir}/lastepoch199_model_segment_contrast.pt'
-            checkpoint = torch.load(file_name)
-            self.model.load_state_dict(checkpoint['model'])
-            self.train_step = checkpoint['train_step']
-            self.val_step = checkpoint['val_step']
-            self.optimizer.load_state_dict(checkpoint['optimizer'])
-
-            print(f'{file_name} loaded from epoch {checkpoint["epoch"]}')
-            
-            # load model head
-            file_name = f'{self.params.log_dir}/lastepoch199_model_head_segment_contrast.pt'
-            checkpoint = torch.load(file_name)
-            self.model_head.load_state_dict(checkpoint['model'])
+            print("Can not find checkpoints at "+core_path)
+            import sys
+            sys.exit()    
+        
+        checkpoint = torch.load(core_path)
+        self.model.load_state_dict(checkpoint['model'])
+        epoch_core = checkpoint['epoch']
+        
+        checkpoint = torch.load(head_path)
+        self.model_head.load_state_dict(checkpoint['model'])
+        epoch_head = checkpoint['epoch']
+        
+        print("Core of epoch",epoch_core," and head of epoch", epoch_head," loaded")
 
     def save_checkpoint(self, checkpoint_id):
         # print(f'Writing model checkpoint for {checkpoint_id}')

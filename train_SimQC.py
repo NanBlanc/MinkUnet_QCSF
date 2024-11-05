@@ -14,8 +14,13 @@ if __name__ == "__main__":
     #INPUT
     # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC_sample',                        help='Path to dataset (default: ./Datasets/SimQC')
     parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                        help='Path to dataset (default: ./Datasets/SimQC')
-    parser.add_argument('--use-intensity', action='store_true', default=False,                             help='use points intensity')
+    parser.add_argument('--use-intensity', action='store_true', default=True,                             help='use points intensity')
     parser.add_argument('--max-intensity', type=float, default=1025,                                    help='max valued of intensity used to normalize')
+
+    #FINETUNING
+    parser.add_argument('--load-checkpoint', type=str, default="/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train_181024_int+tr/lastepoch19_model.pt",                          help='load checkpoint (default: True')
+    # parser.add_argument('--use-intensity', action='store_true', default=True,                             help='use points intensity')
+    # parser.add_argument('--max-intensity', type=float, default=125,                                    help='max valued of intensity used to normalize')
 
     
     #OUTPUT
@@ -35,7 +40,6 @@ if __name__ == "__main__":
     parser.add_argument('--num-points', type=int, default=80000,                                         help='Number of points sampled from point clouds (default: 80000')
     parser.add_argument('--sparse-model', type=str, default='MinkUNet',                                   help='Sparse model to be used (default: MinkUNet')
     parser.add_argument('--linear-eval', action='store_true', default=False,                              help='Fine-tune or linear evaluation (default: False')
-    parser.add_argument('--load-checkpoint', action='store_true', default=False,                          help='load checkpoint (default: True')
     parser.add_argument('--load-epoch', type=str, default='lastepoch199',                                 help='model checkpoint (default: classifier_checkpoint)')
     parser.add_argument('--accum-steps', type=int, default=1,                                            help='Number steps to accumulate gradient')
     parser.add_argument('--inference', action='store_true', default=False,                               help='visualize inference point cloud (default: False')

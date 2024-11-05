@@ -73,7 +73,8 @@ class AggregatedPCDataLoader(Dataset):
             cloud = ost.readPly(self.points_datapath[index])            
             
             #transforms
-            cloud = self.transform(cloud)
+            # cloud = self.transform(cloud)
+            
             
             #reshape labels as (nb_po,1)
             labels=cloud[:,4].astype(np.int32) if self.use_intensity else cloud[:,4].astype(np.int32)
