@@ -33,7 +33,7 @@ if __name__ == "__main__":
     parser.add_argument('--dataset-name', type=str, default='SimQC',                                    help='Name of dataset (default: SimQC')
     parser.add_argument('--num_classes', type=int, default=4,                                            help='Number of classes in the dataset')
     parser.add_argument('--batch-size', type=int, default=20, metavar='N',                               help='input training batch-size')
-    parser.add_argument('--epochs', type=int, default=100, metavar='N',                                    help='number of training epochs (default: 15)')
+    parser.add_argument('--epochs', type=int, default=2000, metavar='N',                                    help='number of training epochs (default: 15)')
     parser.add_argument('--lr', type=float, default=2.4e-1,                                               help='learning rate (default: 2.4e-1')
     parser.add_argument("--decay-lr", default=1e-4, action="store", type=float,                           help='Learning rate decay (default: 1e-4')
     parser.add_argument('--use-cuda', action='store_true', default=True,                                    help='using cuda (default: True')
