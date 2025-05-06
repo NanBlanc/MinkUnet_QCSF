@@ -31,8 +31,7 @@ class AggregatedPCTrainer(pl.LightningModule):
         self.log_path=ost.createDirIncremental(self.params.log_dir)
         self.writer = SummaryWriter(self.log_path)
 
-                
-        if self.params.load_checkpoint is not None:
+        if not(self.params.load_checkpoint is None or self.params.load_checkpoint is "None"):
             self.load_checkpoint()
         
         self.labels = data_map_SimQC.labels

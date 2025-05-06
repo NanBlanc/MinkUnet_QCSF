@@ -11,13 +11,15 @@ import OSToolBox as ost
 warnings.filterwarnings('ignore')
 
 class AggregatedPCDataLoader(Dataset):
-    def __init__(self, root,  split='train', dataset_name="SimQC", resolution=0.05, use_intensity=False, max_intensity=None, ignore_labels=None):
+    def __init__(self, root,  split='train', dataset_name="SimQC", resolution=0.05, use_intensity=False, max_intensity=None, use_transform=True, ignore_labels=None, dataset_usage=None):
         self.root = root
         self.dataset_name = dataset_name
         self.resolution = resolution
         self.use_intensity = use_intensity
         self.max_intensity = max_intensity 
         self.ignore_labels=ignore_labels
+        self.dataset_usage=dataset_usage
+        self.use_transform=use_transform
         
         assert (split == 'train' or split == 'validation' or split =='test')
         self.split = split
@@ -29,14 +31,21 @@ class AggregatedPCDataLoader(Dataset):
                 split_path = self.root+"/validation"
             elif os.path.isdir(self.root+"/val"):
                 split_path = self.root+"/val"
-               
+        
         self.datapath_list(split_path)
         print('The size of %s data is %d'%(split,len(self.points_datapath)))
 
 
     def datapath_list(self,split_path):
-        self.points_datapath = ost.getFileBySubstr(split_path,'.ply')
-
+        
+        tmp_path_files=ost.getFileBySubstr(split_path,'.ply')
+        if self.dataset_usage is None or self.dataset_usage==1 or self.split!= "train" :
+            self.points_datapath = tmp_path_files
+        else :
+            print("INFO : dataset_usage detected, only using :", self.dataset_usage,"% of dataset")
+            ind_full=np.load(ost.getFileBySubstr(self.root,'index_selection')[0],allow_pickle=True)
+            ind_selected=ind_full[:int(ind_full.shape[0]*self.dataset_usage)]
+            self.points_datapath =[tmp_path_files[i] for i in ind_selected]   
 
     def transform(self, points):
         ##point drop
@@ -73,7 +82,8 @@ class AggregatedPCDataLoader(Dataset):
             cloud = ost.readPly(self.points_datapath[index])            
             
             # transforms
-            cloud = self.transform(cloud)
+            if self.use_transform:
+                cloud = self.transform(cloud)
             
             
             #reshape labels as (nb_po,1)

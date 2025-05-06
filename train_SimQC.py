@@ -7,33 +7,41 @@ from utils import *
 import argparse
 from numpy import inf
 import MinkowskiEngine as ME
+import OSToolBox as ost
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='SparseSimCLR')
     
     #INPUT
     # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC_sample',                        help='Path to dataset (default: ./Datasets/SimQC')
-    # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                        help='Path to dataset (default: ./Datasets/SimQC')
-    # parser.add_argument('--use-intensity', action='store_true', default=True,                             help='use points intensity')
-    # parser.add_argument('--max-intensity', type=float, default=1025,                                    help='max valued of intensity used to normalize')
-    # parser.add_argument('--load-checkpoint', type=str, default="None",                          help='load checkpoint (default: True')
+    parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/SimQC',                        help='Path to dataset (default: ./Datasets/SimQC')
+    parser.add_argument('--use-intensity', action='store_true', default=True,                             help='use points intensity')
+    parser.add_argument('--max-intensity', type=float, default=1025,                                    help='max valued of intensity used to normalize')
+    parser.add_argument("--use_transform", type=ost.str2bool, nargs='?', const=True, default=True,     help="use transform or not")
+    parser.add_argument('--dataset-usage', type=float, default=0.5,                                    help='pourcentage of dataset in use (for train only)')
+    parser.add_argument("--load-checkpoint", type=str, default=None,                                    help="checkpoint path or None (default: True)")
+    parser.add_argument('--epochs', type=int, default=20, metavar='N',                                    help='number of training epochs (default: 15)')
+
 
     #FINETUNING
-    parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/ALSlike_p12train',                        help='Path to dataset (default: ./Datasets/SimQC')
-    parser.add_argument('--load-checkpoint', type=str, default=None,                          help='load checkpoint (default: True')
+    # parser.add_argument('--data-dir', type=str, default='/home/reza/PHD/Data/ALSlike_p12train',                        help='Path to dataset (default: ./Datasets/SimQC')
     # parser.add_argument('--load-checkpoint', type=str, default="/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train_181024_int+tr/lastepoch19_model.pt",                          help='load checkpoint (default: True')
-    parser.add_argument('--use-intensity', action='store_true', default=True,                             help='use points intensity')
-    parser.add_argument('--max-intensity', type=float, default=125,                                    help='max valued of intensity used to normalize')
+    # parser.add_argument('--use-intensity', action='store_true', default=True,                             help='use points intensity')
+    # parser.add_argument('--max-intensity', type=float, default=125,                                    help='max valued of intensity used to normalize')
+    # parser.add_argument("--use_transform", type=ost.str2bool, nargs='?', const=True, default=True,     help="use transform or not")
+    # parser.add_argument('--epochs', type=int, default=20, metavar='N',                                    help='number of training epochs (default: 15)')
+    # parser.add_argument('--dataset-usage', type=float, default=1,                                    help='pourcentage of dataset in use (for train only)')
 
-    
+
     #OUTPUT
     parser.add_argument('--log-dir', type=str, default='/home/reza/PHD/Sum24/SimQC/MinkUNet/logs/train',  help='logging directory (default: checkpoint)')
+    
+    
     
     #SHOULD STAY LIKE THAT
     parser.add_argument('--dataset-name', type=str, default='SimQC',                                    help='Name of dataset (default: SimQC')
     parser.add_argument('--num_classes', type=int, default=4,                                            help='Number of classes in the dataset')
     parser.add_argument('--batch-size', type=int, default=20, metavar='N',                               help='input training batch-size')
-    parser.add_argument('--epochs', type=int, default=2000, metavar='N',                                    help='number of training epochs (default: 15)')
     parser.add_argument('--lr', type=float, default=2.4e-1,                                               help='learning rate (default: 2.4e-1')
     parser.add_argument("--decay-lr", default=1e-4, action="store", type=float,                           help='Learning rate decay (default: 1e-4')
     parser.add_argument('--use-cuda', action='store_true', default=True,                                    help='using cuda (default: True')
@@ -43,7 +51,6 @@ if __name__ == "__main__":
     parser.add_argument('--num-points', type=int, default=80000,                                         help='Number of points sampled from point clouds (default: 80000')
     parser.add_argument('--sparse-model', type=str, default='MinkUNet',                                   help='Sparse model to be used (default: MinkUNet')
     parser.add_argument('--linear-eval', action='store_true', default=False,                              help='Fine-tune or linear evaluation (default: False')
-    parser.add_argument('--load-epoch', type=str, default='lastepoch199',                                 help='model checkpoint (default: classifier_checkpoint)')
     parser.add_argument('--accum-steps', type=int, default=1,                                            help='Number steps to accumulate gradient')
     parser.add_argument('--inference', action='store_true', default=False,                               help='visualize inference point cloud (default: False')
     parser.add_argument('--ignore-labels', type=str, default=4,                                        help='str of ignore labels sperated by commas ex : --ignore-labels="1,2,3"')

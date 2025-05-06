@@ -80,8 +80,24 @@ def write_summary(writer, summary_id, report, epoch):
 
 def get_dataset(args):
     #ajouter get test dataset
-    data_train = data_loader(root=args.data_dir, split='train', dataset_name=args.dataset_name, resolution=args.sparse_resolution, use_intensity=args.use_intensity, max_intensity=args.max_intensity, ignore_labels=args.ignore_labels)
-    data_test = data_loader(root=args.data_dir, split='validation', dataset_name=args.dataset_name, resolution=args.sparse_resolution, use_intensity=args.use_intensity, max_intensity=args.max_intensity, ignore_labels=args.ignore_labels)
+    data_train = data_loader(root=args.data_dir, 
+                             split='train', 
+                             dataset_name=args.dataset_name, 
+                             resolution=args.sparse_resolution, 
+                             use_intensity=args.use_intensity, 
+                             max_intensity=args.max_intensity, 
+                             use_transform=args.use_transform,
+                             ignore_labels=args.ignore_labels, 
+                             dataset_usage=args.dataset_usage)
+    data_test = data_loader(root=args.data_dir, 
+                            split='validation', 
+                            dataset_name=args.dataset_name, 
+                            resolution=args.sparse_resolution, 
+                            use_intensity=args.use_intensity, 
+                            max_intensity=args.max_intensity, 
+                            use_transform=args.use_transform,
+                            ignore_labels=args.ignore_labels, 
+                            dataset_usage=args.dataset_usage)
     return data_train, data_test
 
 def get_data_loader(data_train, data_test, args):
